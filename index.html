@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+    * {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        border: 0;
+    }
+
+    #box {
+        width: 500px;
+        height: 200px;
+        padding: 7px;
+        border: 1px solid #ccc;
+        margin: 100px auto;
+        position: relative;
+    }
+
+    .screen {
+        width: 500px;
+        height: 200px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .screen li {
+        width: 500px;
+        height: 200px;
+        overflow: hidden;
+        float: left;
+    }
+
+    .screen ul {
+        position: absolute;
+        left: 0;
+        top: 0px;
+        width: 3000px;
+    }
+
+    #box ol {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 10px;
+        line-height: 20px;
+        text-align: center;
+        left: 50%;
+    }
+
+    #box ol li {
+        float: left;
+        width: 20px;
+        height: 20px;
+        background: #fff;
+        border: 1px solid #ccc;
+        margin-left: 10px;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    #box ol li.current {
+        background: yellow;
+    }
+
+    #arr {
+        display: none;
+    }
+
+    #arr span {
+        width: 40px;
+        height: 40px;
+        position: absolute;
+        left: 5px;
+        top: 50%;
+        margin-top: -20px;
+        background: #000;
+        cursor: pointer;
+        line-height: 40px;
+        text-align: center;
+        font: bold 30px '黑体';
+        color: #fff;
+        opacity: 0.3;
+        border: 1px solid #fff;
+    }
+
+    #arr #right {
+        right: 5px;
+        left: auto;
+    }
+    </style>
+</head>
+
+<body>
+    <div id='box'>
+        <div class="screen">
+            <ul>
+                <li><img src="images/1.jpg"></li>
+                <li><img src="images/2.jpg"></li>
+                <li><img src="images/3.jpg"></li>
+                <li><img src="images/4.jpg"></li>
+                <li><img src="images/5.jpg"></li>
+            </ul>
+            <ol>
+            </ol>
+        </div>
+        <div id="arr"><span id="left">&lt;</span><span id="right">&gt;</span></div>
+    </div>
+</body>
+
+</html>
+<script>
+var box = document.getElementById("box"),
+    screen = box.children[0],
+    ul = screen.children[0],
+    ullis = ul.children,
+    ol = screen.children[1],
+    imgWidth = screen.offsetWidth,
+    arr = document.getElementById("arr"),
+    arrLeft = document.getElementById("left"),
+    arrRight = document.getElementById("right"),
+    pic = 0,
+    square = 0;
+
+
+for (var i = 0; i < ullis.length; i++) {
+    var li = document.createElement("li");
+    ol.appendChild(li);
+    li.innerHTML = i + 1;
+}
+var ollis = ol.children;
+ollis[0].className = "current";
+
+var firstImg = ullis[0].cloneNode(true); //如果不加上.cloneNode(true),只是单纯的把li移动了，而不是重新复制一个
+ul.appendChild(firstImg); //这样能够很好地实现无缝衔接；
+
+// 根据按钮来让图片滚动
+for (var j = 0; j < ollis.length; j++) {
+    ollis[j].index = j;
+    ollis[j].onmouseover = function() {
+        for (var k = 0; k < ollis.length; k++) {
+            ollis[k].className = "";
+        }
+        this.className = "current";
+        var target = -this.index * imgWidth;
+        animate(ul, target);
+        square = pic = this.index;
+    }
+}
+// 鼠标放到盒子上面清除定时器，并显示箭头
+box.onmouseover = function() {
+    arr.style.display = "block";
+    clearInterval(timer);
+}
+// 鼠标离开盒子重新设置定时器，并隐藏箭头
+box.onmouseout = function() {
+    arr.style.display = "none";
+    timer = setInterval(playnextR, 1000);
+}
+
+arrRight.onclick = function() {
+    playnextR();
+}
+arrLeft.onclick = function() {
+        playnextL();
+    }
+
+//封装向右切换的动画函数
+function playnextR() {
+    if (pic == ullis.length - 1) { //注意这里是pic == ullis.length-1，先前写成了pic == ollis.length-1,导致出现bug
+        ul.style.left = 0;
+        pic = 0;
+    }
+    pic++;
+    var target = -imgWidth * pic;
+    animate(ul, target);
+    if (square < ollis.length - 1) {
+        square++;
+    } else {
+        square = 0;
+    }
+    for (var i = 0; i < ollis.length; i++) {
+        ollis[i].className = "";
+    }
+    ollis[square].className = "current";
+}
+
+//封装向左切换的动画函数
+function playnextL() {
+    if (pic == 0) {
+        ul.style.left = -imgWidth * (ullis.length - 1) + "px"; //后面的这个px一定要注意加上去；
+        pic = ullis.length - 1;
+    }
+    pic--;
+    var target = -imgWidth * pic;
+    animate(ul, target);
+    if (square > 0) {
+        square--;
+    } else {
+        square = ollis.length - 1;
+    }
+    for (var i = 0; i < ollis.length; i++) {
+        ollis[i].className = "";
+    }
+    ollis[square].className = "current";
+
+}
+
+//4.添加自动滚动
+//相当于每秒钟按下一次右箭头
+timer = setInterval(playnextR, 1000);
+
+
+function animate(obj, target) { //缓动动画  事实证明还是缓动效果比较细腻
+    clearInterval(obj.timer); //防止重复调用，用前先清定时器
+    obj.timer = setInterval(function() {
+        var leader = obj.offsetLeft; //读取的时候用offsetTop确保也能读取到不是行内的样式
+        var step = (target - leader) / 10;
+        /*step = Math.ceil(step);*/ //offsetLeft获取到的数值自动进行四舍五入，所以只能出现整数；
+        step = step > 0 ? Math.ceil(step) : Math.floor(step); //为了确保负值的时候不出现bug，能够及时清理定时器；
+        //通过下面这个方法能够在控制台中体会到数据的渐变
+        console.log("target:" + target + "---leader:" + leader + "---step:" + step);
+        if (leader != target) {
+            obj.style.left = leader + step + "px"; //赋值的时候就用top设置行间样式
+        } else {
+            clearInterval(obj.timer);
+        }
+    }, 25)
+}
+</script>
