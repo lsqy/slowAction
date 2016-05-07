@@ -8,8 +8,6 @@
     * {
         padding: 0;
         margin: 0;
-        list-style: none;
-        border: 0;
     }
 
     #box {
@@ -40,6 +38,7 @@
         left: 0;
         top: 0px;
         width: 3000px;
+        list-style: none;
     }
 
     #box ol {
@@ -153,21 +152,21 @@ for (var j = 0; j < ollis.length; j++) {
 }
 // 鼠标放到盒子上面清除定时器，并显示箭头
 box.onmouseover = function() {
-    arr.style.display = "block";
-    clearInterval(timer);
-}
-// 鼠标离开盒子重新设置定时器，并隐藏箭头
+        arr.style.display = "block";
+        clearInterval(timer);
+    }
+    // 鼠标离开盒子重新设置定时器，并隐藏箭头
 box.onmouseout = function() {
     arr.style.display = "none";
-    timer = setInterval(playnextR, 1000);
+    timer = setInterval(playnextR, 2000);
 }
 
 arrRight.onclick = function() {
     playnextR();
 }
 arrLeft.onclick = function() {
-        playnextL();
-    }
+    playnextL();
+}
 
 //封装向右切换的动画函数
 function playnextR() {
@@ -212,7 +211,7 @@ function playnextL() {
 
 //4.添加自动滚动
 //相当于每秒钟按下一次右箭头
-timer = setInterval(playnextR, 1000);
+timer = setInterval(playnextR, 2000);
 
 
 function animate(obj, target) { //缓动动画  事实证明还是缓动效果比较细腻
